@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
- PebbleOS 
+ PebbleOS - Even G1 
 </p>
 
 <p align="center">
@@ -11,6 +11,8 @@
   <a href="https://pebbleos-core.readthedocs.io/en/latest"><img src="https://readthedocs.org/projects/pebbleos-core/badge/?version=latest&style=flat"></a>
   <a href="https://forum.repebble.com/"><img src="https://img.shields.io/discourse/posts?server=https%3A%2F%2Fforum.repebble.com&label=forum"></a>
 </p>
+
+Port of Pebble OS to Even Realities G1. Current plan is to have it run on one side of the frames and then set up the communication to run on the second MPU in a secondary mode.
 
 ## Resources
 

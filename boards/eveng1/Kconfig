@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Core Devices LLC
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_EVENG1
+    bool
+    default y
+
+config NORDIC_QSPI_NOR_FLASH_LAYOUT_PAGE_SIZE
+    int
+    default 4096
+
+config NORDIC_QSPI_NOR_STACK_WRITE_BUFFER_SIZE
+    int
+    default 4

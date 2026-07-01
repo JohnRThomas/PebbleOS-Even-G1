@@ -3,6 +3,8 @@ if bld.env.CONFIG_QEMU:
     mfg_board = 'qemu'
 elif bld.env.CONFIG_BOARD_ASTERIX:
     mfg_board = 'asterix'
+elif bld.env.CONFIG_BOARD_EVENG1:
+    mfg_board = 'eveng1'
 elif bld.env.CONFIG_BOARD_OBELIX:
     mfg_board = 'obelix'
 elif bld.env.CONFIG_BOARD_GETAFIX:

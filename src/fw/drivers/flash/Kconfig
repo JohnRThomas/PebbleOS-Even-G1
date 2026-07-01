@@ -23,6 +23,11 @@ config FLASH_QEMU
     help
       Support for the QEMU external flash peripheral.
 
+config NORDIC_QSPI_NOR
+    bool "NRF5 QSPI NOR Flash"
+    help
+      NRF5 QSPI NOR flash supporting the JEDEC CFI interface (such as MX25R6435F)
+
 module = DRIVER_FLASH
 module-str = Flash
 source "src/fw/Kconfig.template.log_level"

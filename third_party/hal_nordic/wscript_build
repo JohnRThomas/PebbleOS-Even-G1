@@ -38,6 +38,9 @@ micro_includes = [
 if bld.env.CONFIG_BOARD_ASTERIX:
     # is there a better way to do this?
     micro_includes += ['../../src/fw/board/boards/board_asterix']
+if bld.env.CONFIG_BOARD_EVENG1:
+    # is there a better way to do this?
+    micro_includes += ['../../src/fw/board/boards/board_eveng1']
 else:
     bld.fatal("no board for nRF5 includes")
 

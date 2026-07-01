@@ -96,6 +96,8 @@ def _generate_memory_layout(bld):
         ldscript_template = bld.path.find_node('qemu_flash_fw.ld.template')
     elif bld.env.CONFIG_BOARD_ASTERIX:
         ldscript_template = bld.path.find_node('nrf52840_flash_fw.ld.template')
+    elif bld.env.CONFIG_BOARD_EVENG1:
+        ldscript_template = bld.path.find_node('nrf5340_flash_fw.ld.template')
     elif bld.env.CONFIG_BOARD_OBELIX or bld.env.CONFIG_BOARD_GETAFIX:
         ldscript_template = bld.path.find_node('sf32lb52_flash_fw.ld.template')
 
@@ -131,6 +133,16 @@ def _generate_memory_layout(bld):
         else:
             fw_max_size = flash_size
 
+    elif bld.env.CONFIG_SOC_NRF53:
+        # Bootloader
+        offset_size = 32 * 1024
+        flash_size = 1024 * 1024
+        if bld.env.CONFIG_BOARD_ASTERIX and bld.env.VARIANT == 'prf' and not bld.env.CONFIG_MFG:
+            fw_max_size = flash_size // 2
+        else:
+            fw_max_size = flash_size
+
+
     if bld.env.CONFIG_QEMU:
         flash_size = 4 * 1024 * 1024
         fw_max_size = flash_size
@@ -138,6 +150,8 @@ def _generate_memory_layout(bld):
     if bld.env.CONFIG_QEMU:
         flash_origin = 0x00000000
     elif bld.env.CONFIG_SOC_NRF52:
+        flash_origin = 0x00000000
+    elif bld.env.CONFIG_SOC_NRF53:
         flash_origin = 0x00000000
     elif bld.env.CONFIG_SOC_SF32LB52:
         flash_origin = 0x12000000

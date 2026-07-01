@@ -10,6 +10,9 @@ choice
 config SOC_NRF52
     bool "Nordic nRF52"
 
+config SOC_NRF53
+    bool "Nordic nRF53"
+
 config SOC_SF32LB52
     bool "SiFli SF32LB52"
 
@@ -21,6 +24,7 @@ endchoice
 config SOC
     string
     default "NRF52" if SOC_NRF52
+    default "NRF53" if SOC_NRF53
     default "SF32LB52" if SOC_SF32LB52
     help
       Stringified SoC name, for places that need the name as a token
@@ -36,6 +40,7 @@ config QEMU
 choice
     prompt "ARM Cortex core"
     default CORTEX_M4 if SOC_NRF52
+    default CORTEX_M4 if SOC_NRF53
     default CORTEX_M33 if SOC_SF32LB52
 
 config CORTEX_M4
