@@ -410,7 +410,7 @@ def size_resources(ctx):
     if pbpack_path is None:
         ctx.fatal('No resource pbpack found')
 
-    if ctx.env.CONFIG_SOC_NRF52:
+    if ctx.env.CONFIG_SOC_NRF5:
         max_size = 1024 * 1024
     elif ctx.env.CONFIG_SOC_SF32LB52:
         max_size = 2048 * 1024
@@ -614,6 +614,9 @@ def _check_firmware_image_size(ctx, path):
         else:
             # 1024k of flash and 32k bootloader
             max_firmware_size = (1024 - 32) * BYTES_PER_K
+    elif ctx.env.CONFIG_SOC_NRF53:
+        # 1024k of flash, no bootloader
+        max_firmware_size = 1024 * BYTES_PER_K
     elif ctx.env.CONFIG_SOC_SF32LB52:
         if ctx.env.VARIANT == 'prf' and not ctx.env.CONFIG_MFG:
             max_firmware_size = 576 * BYTES_PER_K

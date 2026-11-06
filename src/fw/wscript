@@ -134,14 +134,10 @@ def _generate_memory_layout(bld):
             fw_max_size = flash_size
 
     elif bld.env.CONFIG_SOC_NRF53:
-        # Bootloader
-        offset_size = 32 * 1024
+        # No bootloader yet: firmware owns all of the application core flash
+        offset_size = 0
         flash_size = 1024 * 1024
-        if bld.env.CONFIG_BOARD_ASTERIX and bld.env.VARIANT == 'prf' and not bld.env.CONFIG_MFG:
-            fw_max_size = flash_size // 2
-        else:
-            fw_max_size = flash_size
-
+        fw_max_size = flash_size
 
     if bld.env.CONFIG_QEMU:
         flash_size = 4 * 1024 * 1024
@@ -149,9 +145,7 @@ def _generate_memory_layout(bld):
 
     if bld.env.CONFIG_QEMU:
         flash_origin = 0x00000000
-    elif bld.env.CONFIG_SOC_NRF52:
-        flash_origin = 0x00000000
-    elif bld.env.CONFIG_SOC_NRF53:
+    elif bld.env.CONFIG_SOC_NRF5:
         flash_origin = 0x00000000
     elif bld.env.CONFIG_SOC_SF32LB52:
         flash_origin = 0x12000000
@@ -197,7 +191,12 @@ def _generate_memory_layout(bld):
                       "time." % name)
 
     # Determine the board's total RAM layout.
-    if bld.env.CONFIG_PLATFORM_EMERY:
+    if bld.env.CONFIG_BOARD_EVENG1:
+        # We have 512K of SRAM, first 256 bytes retained, last 64K reserved
+        # for IPC shared memory with the network core
+        retained_size = 256
+        total_ram = (0x20000000 + retained_size, (512 - 64) * 1024 - retained_size)
+    elif bld.env.CONFIG_PLATFORM_EMERY:
         # We have 512K of SRAM, last 1K reserved for LCPU IPC
         total_ram = (0x20000000, (512 - 1) * 1024)
     elif bld.env.CONFIG_PLATFORM_FLINT:
@@ -404,7 +403,7 @@ def build(bld):
     if bld.env.CONFIG_MEMFAULT:
         fw_includes_use.append('memfault_includes')
 
-    if bld.env.CONFIG_SOC_NRF52:
+    if bld.env.CONFIG_SOC_NRF5:
         fw_includes_use.append('hal_nordic')
     elif bld.env.CONFIG_SOC_SF32LB52:
         fw_includes_use.append('hal_sifli')

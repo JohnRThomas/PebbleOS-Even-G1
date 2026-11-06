@@ -12,18 +12,24 @@
 
 #include <inttypes.h>
 
+#ifdef NRF_WDT0
+#define WDT NRF_WDT0
+#else
+#define WDT NRF_WDT
+#endif
+
 void watchdog_init(void) {
-  nrf_wdt_reload_request_enable(NRF_WDT, NRF_WDT_RR0);
+  nrf_wdt_reload_request_enable(WDT, NRF_WDT_RR0);
   /* WDT expiration: 8s */
-  nrf_wdt_reload_value_set(NRF_WDT, 32768 * 8);
+  nrf_wdt_reload_value_set(WDT, 32768 * 8);
 }
 
 void watchdog_start(void) {
-  nrf_wdt_task_trigger(NRF_WDT, NRF_WDT_TASK_START);
+  nrf_wdt_task_trigger(WDT, NRF_WDT_TASK_START);
 }
 
 void watchdog_feed(void) {
-  nrf_wdt_reload_request_set(NRF_WDT, NRF_WDT_RR0);
+  nrf_wdt_reload_request_set(WDT, NRF_WDT_RR0);
 }
 
 bool watchdog_check_reset_flag(void) {

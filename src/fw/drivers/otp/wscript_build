@@ -7,6 +7,8 @@ use = ['fw_includes']
 if bld.env.CONFIG_OTP_FLASH:
     sources.append('otp_flash.c')
     use.append('driver_flash')
+elif bld.env.CONFIG_OTP_STUB:
+    sources.append('../stubs/otp.c')
 
 bld.objects(
     name='driver_otp',

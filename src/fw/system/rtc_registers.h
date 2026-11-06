@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 #define RTC_BKP_BOOTBIT_DR                      0
 #define STUCK_BUTTON_REGISTER                   1
 #define BOOTLOADER_VERSION_REGISTER             2

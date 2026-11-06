@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 #include <drivers/nrfx_common.h>
 #include <soc/nrfx_coredep.h>
 #endif
@@ -44,6 +44,8 @@ Profiler g_profiler;
 #include "irq_qemu.def"
 #elif defined(CONFIG_SOC_NRF52)
 #include "irq_nrf52.def"
+#elif defined(CONFIG_SOC_NRF53)
+#include "irq_nrf53.def"
 #elif defined(CONFIG_SOC_SF32LB52)
 #include "irq_sf32lb52.def"
 #else
@@ -62,6 +64,8 @@ static ProfilerNode *s_profiler_nodes[] = {
 #include "irq_qemu.def"
 #elif defined(CONFIG_SOC_NRF52)
 #include "irq_nrf52.def"
+#elif defined(CONFIG_SOC_NRF53)
+#include "irq_nrf53.def"
 #elif defined(CONFIG_SOC_SF32LB52)
 #include "irq_sf32lb52.def"
 #else
@@ -126,7 +130,7 @@ void profiler_node_stop(ProfilerNode *node, uint32_t dwt_cyc_cnt) {
 }
 
 uint32_t profiler_cycles_to_us(uint32_t cycles) {
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
   uint32_t mhz = NRFX_DELAY_CPU_FREQ_MHZ;
 #elif defined(CONFIG_SOC_SF32LB52)
   uint32_t mhz = HAL_RCC_GetHCLKFreq(CORE_ID_HCPU);
@@ -157,7 +161,7 @@ uint32_t profiler_get_total_duration(bool in_us) {
   }
 
   if (in_us) {
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
     uint32_t mhz = NRFX_DELAY_CPU_FREQ_MHZ;
 #elif defined(CONFIG_SOC_SF32LB52)
     uint32_t mhz = HAL_RCC_GetHCLKFreq(CORE_ID_HCPU);
@@ -178,7 +182,7 @@ void profiler_print_stats(void) {
   PROFILER_STOP; // Make sure the profiler has been stopped.
   uint32_t total = profiler_get_total_duration(false);
 
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
   uint32_t mhz = NRFX_DELAY_CPU_FREQ_MHZ;
   char buf[80];
   PROF_LOG(buf, sizeof(buf), "CPU Frequency: %"PRIu32"MHz", mhz);

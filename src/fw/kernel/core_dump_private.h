@@ -23,6 +23,9 @@
 #define COREDUMP_RAM_SIZE (276 * 1024)
 #elif defined(CONFIG_BOARD_ASTERIX)
 #define COREDUMP_RAM_SIZE (256 * 1024)
+#elif defined(CONFIG_BOARD_EVENG1)
+// Excludes the IPC shared memory with the network core
+#define COREDUMP_RAM_SIZE ((512 - 64) * 1024)
 #endif
 
 // LCPU (BLE coprocessor) RAM, in the LPSYS domain outside main RAM.
@@ -35,7 +38,7 @@
 #define CORE_DUMP_FLASH_START   FLASH_REGION_CD_BEGIN
 #define CORE_DUMP_FLASH_END     FLASH_REGION_CD_END
 #define CORE_DUMP_FLASH_SIZE    (CORE_DUMP_FLASH_END - CORE_DUMP_FLASH_START)
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
 #define CORE_DUMP_MAX_IMAGES 2
 #elif defined(CONFIG_SOC_SF32LB52)
 #define CORE_DUMP_MAX_IMAGES 1

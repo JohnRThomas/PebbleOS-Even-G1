@@ -27,7 +27,7 @@ extern uint32_t RTC_ReadBackupRegister(uint32_t reg_id);
 #include <inttypes.h>
 #include <stdint.h>
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 static uint32_t __attribute__((section(".retained"))) retained[256 / 4];
 
 void retained_write(uint8_t id, uint32_t value) {

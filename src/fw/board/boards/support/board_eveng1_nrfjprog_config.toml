@@ -2,10 +2,11 @@
     family = "nRF53"
     clockspeed = 4000
 
+# Macronix MX25U25645G
 [qspi]
     mem_size = 0x2000000
     read_mode = "READ4IO"
-    write_mode = "PP4O"
+    write_mode = "PP4IO"
     address_mode = "BIT32"
     frequency = "M8"
     spi_mode = "MODE0"
@@ -15,22 +16,22 @@
     retain_ram = false
     [qspi.sck]
 	delay = 0
-        pin = 19
-        port = 0
-    [qspi.csn]
         pin = 17
         port = 0
+    [qspi.csn]
+        pin = 18
+        port = 0
     [qspi.dio0]
-        pin = 20
+        pin = 13
         port = 0
     [qspi.dio1]
-        pin = 21
+        pin = 14
         port = 0
     [qspi.dio2]
-        pin = 22
+        pin = 15
         port = 0
     [qspi.dio3]
-        pin = 23
+        pin = 16
         port = 0
 
     [qspi.custom]
@@ -40,6 +41,7 @@
         instructions =  [
             # Enable 32-bit addressing
             {command=0xB7, data=[]},
-            # Enable Quad IO
-            {command=0x01, data=[0x00, 0x02]}
+            # Enable Quad IO (QE is status register bit 6)
+            {command=0x06, data=[]},
+            {command=0x01, data=[0x40]}
         ]

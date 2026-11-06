@@ -25,7 +25,7 @@ extern uint32_t RTC_ReadBackupRegister(uint32_t reg_id);
 _Static_assert(sizeof(RebootReason) == sizeof(uint32_t[4]), "RebootReason is a funny size");
 
 void reboot_reason_set(RebootReason *reason) {
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   uint32_t *raw = (uint32_t*)reason;
 
   if (retained_read(REBOOT_REASON_REGISTER_1)) {
@@ -81,7 +81,7 @@ void reboot_reason_set_restarted_safely(void) {
   reboot_reason_get(&reason);
   reason.restarted_safely = true;
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   uint32_t* raw = (uint32_t *)&reason;
   retained_write(REBOOT_REASON_REGISTER_1, *raw);
 #elif defined(CONFIG_SOC_SF32LB52)
@@ -94,7 +94,7 @@ void reboot_reason_set_restarted_safely(void) {
 }
 
 void reboot_reason_get(RebootReason *reason) {
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   uint32_t *raw = (uint32_t *)reason;
   raw[0] = retained_read(REBOOT_REASON_REGISTER_1);
   raw[1] = retained_read(REBOOT_REASON_STUCK_TASK_PC);
@@ -116,7 +116,7 @@ void reboot_reason_get(RebootReason *reason) {
 }
 
 void reboot_reason_clear(void) {
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   retained_write(REBOOT_REASON_REGISTER_1, 0);
   retained_write(REBOOT_REASON_STUCK_TASK_PC, 0);
   retained_write(REBOOT_REASON_STUCK_TASK_LR, 0);
@@ -135,7 +135,7 @@ void reboot_reason_clear(void) {
 }
 
 uint32_t reboot_get_slot_of_last_launched_app(void) {
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   return retained_read(SLOT_OF_LAST_LAUNCHED_APP);
 #elif defined(CONFIG_SOC_SF32LB52)
   return HAL_Get_backup(SLOT_OF_LAST_LAUNCHED_APP);
@@ -145,7 +145,7 @@ uint32_t reboot_get_slot_of_last_launched_app(void) {
 }
 
 void reboot_set_slot_of_last_launched_app(uint32_t app_slot) {
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   retained_write(SLOT_OF_LAST_LAUNCHED_APP, app_slot);
 #elif defined(CONFIG_SOC_SF32LB52)
   HAL_Set_backup(SLOT_OF_LAST_LAUNCHED_APP, app_slot);

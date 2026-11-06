@@ -8,3 +8,12 @@ choice BT_FW
 endchoice
 
 endif # SOC_NRF52
+
+if SOC_NRF53
+
+# TODO: NimBLE host over IPC to the network core controller
+choice BT_FW
+    default BT_FW_STUB
+endchoice
+
+endif # SOC_NRF53

@@ -19,10 +19,10 @@ config DISPLAY_SHARP_LS013B7DH01_NRF5
     help
       Support for the Sharp LS013B7DH01 display via nRF5.
 
-config DISPLAY_JDB013VGA
-    bool "JDB013VGA (nRF5)"
+config DISPLAY_JBD013VGA_NRF5
+    bool "JBD013VGA (nRF5)"
     help
-      Support for the Jade Bird Display 013VGA display via nRF5.
+      Support for the Jade Bird Display JBD013VGA micro-LED panel via nRF5.
 
 config DISPLAY_QEMU
     bool "QEMU Framebuffer Display"

@@ -1,8 +1,14 @@
 # SPDX-FileCopyrightText: 2026 Core Devices LLC
 # SPDX-License-Identifier: Apache-2.0
 
-sources = ['console.c']
+sources = []
 use = ['fw_includes']
+
+if bld.env.CONFIG_BACKLIGHT_STUB:
+    # The stub provides its own console command
+    sources.append('../stubs/backlight.c')
+else:
+    sources.append('console.c')
 
 if bld.env.CONFIG_BACKLIGHT_AW2016:
     sources.append('aw2016.c')

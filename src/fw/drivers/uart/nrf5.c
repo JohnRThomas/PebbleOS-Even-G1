@@ -17,7 +17,7 @@
 #ifdef NRF_PPI_BASE
 #include <nrfx_ppi.h>
 #else
-#include <nrfx_dppi.h>
+#include <helpers/nrfx_gppi.h>
 #endif
 
 PBL_LOG_MODULE_DEFINE(driver_uart_nrf5, CONFIG_DRIVER_UART_LOG_LEVEL);
@@ -79,17 +79,19 @@ void uart_init(UARTDevice *dev) {
   uint8_t rxdrdy_count_channel;
   uint8_t endrx_clear_channel;
 
-  err = nrfx_dppi_channel_alloc(&rxdrdy_count_channel);
+  err = nrfx_gppi_channel_alloc(&rxdrdy_count_channel);
   PBL_ASSERTN(err == NRFX_SUCCESS);
-  NRF_DPPI_ENDPOINT_SETUP(nrfx_uarte_event_address_get(&dev->periph, NRF_UARTE_EVENT_RXDRDY), rxdrdy_count_channel);
-  NRF_DPPI_ENDPOINT_SETUP(nrfx_timer_task_address_get(&dev->counter, NRF_TIMER_TASK_COUNT), rxdrdy_count_channel);
-  nrfx_dppi_channel_enable(rxdrdy_count_channel);
+  nrfx_gppi_channel_endpoints_setup(rxdrdy_count_channel,
+                                    nrfx_uarte_event_address_get(&dev->periph, NRF_UARTE_EVENT_RXDRDY),
+                                    nrfx_timer_task_address_get(&dev->counter, NRF_TIMER_TASK_COUNT));
 
-  err = nrfx_dppi_channel_alloc(&endrx_clear_channel);
+  err = nrfx_gppi_channel_alloc(&endrx_clear_channel);
   PBL_ASSERTN(err == NRFX_SUCCESS);
-  NRF_DPPI_ENDPOINT_SETUP(nrfx_uarte_event_address_get(&dev->periph, NRF_UARTE_EVENT_ENDRX), endrx_clear_channel);
-  NRF_DPPI_ENDPOINT_SETUP(nrfx_timer_task_address_get(&dev->counter, NRF_TIMER_TASK_CLEAR), endrx_clear_channel);
-  nrfx_dppi_channel_enable(endrx_clear_channel);
+  nrfx_gppi_channel_endpoints_setup(endrx_clear_channel,
+                                    nrfx_uarte_event_address_get(&dev->periph, NRF_UARTE_EVENT_ENDRX),
+                                    nrfx_timer_task_address_get(&dev->counter, NRF_TIMER_TASK_CLEAR));
+
+  nrfx_gppi_channels_enable((1UL << rxdrdy_count_channel) | (1UL << endrx_clear_channel));
 #endif
   
 

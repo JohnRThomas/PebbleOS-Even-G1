@@ -1,6 +1,10 @@
+/* SPDX-FileCopyrightText: 2026 Core Devices LLC */
 /* SPDX-License-Identifier: Apache-2.0 */
 
 #pragma once
+
+// The 640x480 JBD013VGA panel shows a 1bpp Pebble framebuffer in a window
+// of its visible area, see BOARD_CONFIG_DISPLAY.
 
 #define DISPLAY_ORIENTATION_COLUMN_MAJOR_INVERTED 0
 #define DISPLAY_ORIENTATION_ROTATED_180 0
@@ -13,8 +17,8 @@
 #define PBL_RECT 1
 #define PBL_ROUND 0
 
-#define PBL_DISPLAY_WIDTH 640
-#define PBL_DISPLAY_HEIGHT 480
+#define PBL_DISPLAY_WIDTH 144
+#define PBL_DISPLAY_HEIGHT 168
 
 #define LEGACY_2X_DISP_COLS PBL_DISPLAY_WIDTH
 #define LEGACY_2X_DISP_ROWS PBL_DISPLAY_HEIGHT

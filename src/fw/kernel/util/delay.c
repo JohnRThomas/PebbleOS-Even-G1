@@ -5,7 +5,7 @@
 #include "util/attributes.h"
 #include "util/units.h"
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 #include <drivers/nrfx_common.h>
 #include <soc/nrfx_coredep.h>
 #elif defined(CONFIG_SOC_SF32LB52)
@@ -14,7 +14,7 @@
 
 #include <inttypes.h>
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 void NOINLINE delay_us(uint32_t us) {
   nrfx_coredep_delay_us(us);
 }

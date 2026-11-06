@@ -21,6 +21,13 @@ config SOC_QEMU
 
 endchoice
 
+config SOC_NRF5
+    bool
+    default y if SOC_NRF52 || SOC_NRF53
+    help
+      Nordic nRF5 family (nRF52 or nRF53 application core). Gates code
+      shared by all Nordic SoCs.
+
 config SOC
     string
     default "NRF52" if SOC_NRF52
@@ -40,7 +47,7 @@ config QEMU
 choice
     prompt "ARM Cortex core"
     default CORTEX_M4 if SOC_NRF52
-    default CORTEX_M4 if SOC_NRF53
+    default CORTEX_M33 if SOC_NRF53
     default CORTEX_M33 if SOC_SF32LB52
 
 config CORTEX_M4

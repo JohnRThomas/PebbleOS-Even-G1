@@ -5,7 +5,7 @@
 
 #if defined(CONFIG_QEMU)
 # include "board_qemu.h"
-#elif defined(CONFIG_SOC_NRF52)
+#elif defined(CONFIG_SOC_NRF5)
 # include "board_nrf5.h"
 #elif defined(CONFIG_SOC_SF32LB52)
 # include "board_sf32lb52.h"

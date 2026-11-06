@@ -14,4 +14,9 @@ config OTP_FLASH
       OTP backed by SPI NOR flash security registers
       (e.g. GD25 / GD25LQ family). Driver: otp_flash.c.
 
+config OTP_STUB
+    bool "Stub"
+    help
+      No OTP storage; slots read back empty and cannot be written.
+
 endif # OTP

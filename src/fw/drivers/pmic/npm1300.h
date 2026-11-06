@@ -36,6 +36,8 @@ typedef enum {
 typedef struct {
   bool (*gpio_set)(Npm1300GpioId_t id, bool is_high);
   bool (*ldo2_set_enabled)(bool enabled);
+  bool (*ldsw1_set_enabled)(bool enabled);
+  bool (*buck2_set_enabled)(bool enabled);
   bool (*dischg_limit_ma_set)(uint32_t ilim_ma);
 }Npm1300Ops_t;
 

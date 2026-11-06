@@ -2,6 +2,9 @@
 
 static uint32_t s_sampling_interval_ms;
 
+void accel_init(void) {
+}
+
 uint32_t accel_set_sampling_interval(uint32_t interval_us) {
   s_sampling_interval_ms = interval_us / 1000;
   return accel_get_sampling_interval();

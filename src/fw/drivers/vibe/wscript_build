@@ -16,6 +16,8 @@ elif bld.env.CONFIG_VIBE_DRV2604:
         'driver_gpio',
         'pbl_includes',
     ])
+elif bld.env.CONFIG_VIBE_STUB:
+    sources.append('../stubs/vibe.c')
 
 bld.objects(
     name='driver_vibe',

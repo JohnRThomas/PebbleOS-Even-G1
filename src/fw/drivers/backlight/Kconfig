@@ -30,6 +30,11 @@ config BACKLIGHT_PWM
     help
       Support for a backlight driven by a PWM peripheral.
 
+config BACKLIGHT_STUB
+    bool "Stub"
+    help
+      No backlight.
+
 config BACKLIGHT_QEMU
     bool "QEMU"
     help

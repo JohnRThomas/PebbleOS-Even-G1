@@ -14,7 +14,7 @@
 
 extern const uint32_t __SRAM_size__[];
 #if !defined(SRAM_BASE)
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
 #include <drivers/nrfx_common.h>
 #define SRAM_BASE (0x20000000UL)
 #elif defined(CONFIG_SOC_SF32LB52)

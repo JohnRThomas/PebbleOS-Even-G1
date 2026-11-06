@@ -14,6 +14,11 @@
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #include <nrf52840.h>
 #pragma GCC diagnostic pop
+#elif defined(CONFIG_SOC_NRF53)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#include <nrf5340_application.h>
+#pragma GCC diagnostic pop
 #elif defined(CONFIG_SOC_SF32LB52)
 #include <bf0_hal.h>
 #else

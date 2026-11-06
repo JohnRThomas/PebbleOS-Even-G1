@@ -8,7 +8,8 @@
 
 #ifdef CONFIG_FLASH_QEMU
 #include "flash_region_qemu.h"
-#elif defined(CONFIG_FLASH_GD25LQ255E)
+#elif defined(CONFIG_FLASH_GD25LQ255E) || defined(CONFIG_FLASH_MX25U25645G)
+// MX25U25645G has the same size and erase geometry
 #include "flash_region_gd25lq255e.h"
 #elif defined(CONFIG_FLASH_GD25Q256E)
 #include "flash_region_gd25q256e.h"

@@ -68,7 +68,7 @@ typedef struct I2CBusState {
 struct I2CBus {
   I2CBusState *const state;
   const struct I2CBusHal *const hal;
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
   AfConfig scl_gpio;  ///< Alternate Function configuration for SCL pin
   AfConfig sda_gpio;  ///< Alternate Function configuration for SDA pin
 #endif

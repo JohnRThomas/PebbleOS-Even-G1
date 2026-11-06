@@ -33,6 +33,16 @@ elif bld.env.CONFIG_BOARD_ASTERIX:
         'driver_task_watchdog',
     ])
 
+elif bld.env.CONFIG_BOARD_EVENG1:
+    bld.env.DRIVERS.extend([
+        'driver_button',
+        'driver_mcu',
+        'driver_mpu',
+        'driver_nrf5_hfxo',
+        'driver_otp',
+        'driver_task_watchdog',
+    ])
+
 elif bld.env.CONFIG_BOARD_OBELIX:
     bld.env.DRIVERS.extend([
         'driver_button',
@@ -80,7 +90,18 @@ if bld.env.CONFIG_QEMU:
             'pbl_includes',
         ],
     )
-elif bld.env.CONFIG_SOC_NRF52:
+elif bld.env.CONFIG_BOARD_EVENG1:
+    bld.objects(
+        name='driver_button',
+        source=[
+            'eveng1/button.c',
+        ],
+        use=[
+            'fw_includes',
+            'pbl_includes',
+        ],
+    )
+elif bld.env.CONFIG_SOC_NRF5:
     bld.objects(
         name='driver_button',
         source=[
@@ -156,7 +177,7 @@ if bld.env.CONFIG_QEMU:
             'fw_includes',
         ],
     )
-elif bld.env.CONFIG_SOC_NRF52:
+elif bld.env.CONFIG_SOC_NRF5:
     # FIXME: provide working implementation
     bld.objects(
         name='driver_mcu',
@@ -235,7 +256,7 @@ if bld.env.CONFIG_QEMU:
 if bld.env.CONFIG_PWM:
     bld.recurse('pwm')
 
-if bld.env.CONFIG_SOC_NRF52:
+if bld.env.CONFIG_SOC_NRF5:
     bld.objects(
         name='driver_qspi',
         source=[
@@ -267,7 +288,7 @@ if bld.env.CONFIG_RNG:
 if bld.env.CONFIG_RTC:
     bld.recurse('rtc')
 
-if bld.env.CONFIG_SOC_NRF52:
+if bld.env.CONFIG_SOC_NRF5:
     bld.objects(
         name='driver_task_watchdog',
         source=[
@@ -324,7 +345,7 @@ if bld.env.CONFIG_WATCHDOG:
 if bld.env.CONFIG_HRM:
     bld.recurse('hrm')
 
-if bld.env.CONFIG_SOC_NRF52:
+if bld.env.CONFIG_SOC_NRF5:
     bld.objects(
         name='driver_nrf5_hfxo',
         source=[

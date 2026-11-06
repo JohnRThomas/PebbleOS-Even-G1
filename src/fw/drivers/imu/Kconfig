@@ -27,6 +27,11 @@ config ACCEL_LSM6DSO
     help
       Support for the ST LSM6DSO accelerometer/gyroscope.
 
+config ACCEL_STUB
+    bool "Stub"
+    help
+      No accelerometer; reports no samples.
+
 endchoice
 
 if ACCEL_LIS2DW12

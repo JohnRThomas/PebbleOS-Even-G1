@@ -24,6 +24,9 @@ elif bld.env.CONFIG_FLASH_GD25LQ255E:
 elif bld.env.CONFIG_FLASH_GD25Q256E:
     sources.append('gd25q256e.c')
     use.append('driver_qspi')
+elif bld.env.CONFIG_FLASH_MX25U25645G:
+    sources.append('mx25u25645g.c')
+    use.append('driver_qspi')
 bld.objects(
     name='driver_flash',
     source=sources,

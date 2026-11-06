@@ -16,11 +16,20 @@
 #include "system/passert.h"
 #include "util/math.h"
 
+#include <hal/nrf_clock.h>
 #include <hal/nrf_qspi.h>
 #include <nrfx.h>
 
 #include "FreeRTOS.h"
 #include "semphr.h"
+
+// nRF52840 anomaly 244: QSPI may corrupt data above 8MHz if the HF clock
+// source switches
+#ifdef NRF52_SERIES
+#define IS_NRF52_ANOMALY_244_RISK(freq) ((freq) > 8000000UL)
+#else
+#define IS_NRF52_ANOMALY_244_RISK(freq) (false)
+#endif
 
 // NOTE: This driver does not cover anomaly 244, which may cause data corruption
 // if HF clock source is switching between HFXO and HFINT (e.g. by BLE). This
@@ -232,11 +241,16 @@ static void prv_configure_qe(QSPIFlash *dev) {
     return;
   }
 
-  // Enable QE bit
+  // Enable QE bit. Status register writes need WEL set and are non-volatile,
+  // so skip the write when QE is already set.
   switch (part->qer_type) {
     case JESD216_DW15_QER_S1B6:
       prv_read_sr1(dev, &sr[0]);
+      if ((sr[0] & (1U << 6U)) != 0U) {
+        return;
+      }
       sr[0] |= (1U << 6U);
+      prv_write_enable(dev);
       prv_write_sr(dev, sr, 1U);
       break;
     case JESD216_DW15_QER_S2B1v1:
@@ -245,17 +259,29 @@ static void prv_configure_qe(QSPIFlash *dev) {
       // Writing SR2 requires writing SR1 as well
       prv_read_sr1(dev, &sr[0]);
       prv_read_sr2(dev, &sr[1]);
+      if ((sr[1] & (1U << 1U)) != 0U) {
+        return;
+      }
       sr[1] |= (1U << 1U);
+      prv_write_enable(dev);
       prv_write_sr(dev, sr, 2U);
       break;
     case JESD216_DW15_QER_S2B1v6:
       // We can write SR2 without writing SR1
       prv_read_sr2(dev, &sr[1]);
+      if ((sr[1] & (1U << 1U)) != 0U) {
+        return;
+      }
       sr[1] |= (1U << 1U);
+      prv_write_enable(dev);
       prv_write_sr2(dev, sr[1]);
       break;
     default:
       PBL_ASSERTN(false);
+  }
+
+  // Wait for the status register write to complete
+  while (prv_wip_check(dev)) {
   }
 }
 
@@ -293,9 +319,15 @@ void qspi_flash_init(QSPIFlash *dev, QSPIFlashPart *part, bool coredump_mode) {
     return;
   }
 
-  // QSPI clock is 32MHz, we have dividers from 1 to 16
-  PBL_ASSERTN(dev->qspi->clk_freq_hz <= 32000000UL && dev->qspi->clk_freq_hz >= 200000UL);
-  if (dev->qspi->clk_freq_hz > 8000000UL) {
+#if NRF_CLOCK_HAS_HFCLK192M
+  // nRF53: QSPI is clocked from HFCLK192M, with /1 the QSPI base clock is 96MHz
+  nrf_clock_hfclk192m_div_set(NRF_CLOCK, NRF_CLOCK_HFCLK_DIV_1);
+#endif
+
+  // SCKFREQ divides the QSPI base clock by 1 to 32
+  PBL_ASSERTN(dev->qspi->clk_freq_hz <= NRF_QSPI_BASE_CLOCK_FREQ &&
+              dev->qspi->clk_freq_hz >= NRF_QSPI_BASE_CLOCK_FREQ / 32U);
+  if (IS_NRF52_ANOMALY_244_RISK(dev->qspi->clk_freq_hz)) {
     PBL_LOG_WRN(
         "QSPI initialized at %lu Hz, which may cause data corruption if HF clock source switches "
         "(anomaly 244)",
@@ -360,9 +392,22 @@ void qspi_flash_init(QSPIFlash *dev, QSPIFlashPart *part, bool coredump_mode) {
   conf_phy.sck_delay = 5U;
   conf_phy.dpmen = false;
   conf_phy.spi_mode = NRF_QSPI_MODE_0;
-  conf_phy.sck_freq = (32000000UL / dev->qspi->clk_freq_hz) - 1U;
+  conf_phy.sck_freq = (NRF_QSPI_BASE_CLOCK_FREQ / dev->qspi->clk_freq_hz) - 1U;
 
   nrf_qspi_ifconfig1_set(NRF_QSPI, &conf_phy);
+
+#ifdef NRF53_SERIES
+  // nRF5340 anomaly 121: extra IFCONFIG0 bits and IFTIMING depend on SCK
+  uint32_t ifconfig0 = nrf_qspi_ifconfig0_raw_get(NRF_QSPI);
+  if (conf_phy.sck_freq == NRF_QSPI_FREQ_DIV1) {
+    ifconfig0 |= (1UL << 16) | (1UL << 17);
+  } else {
+    ifconfig0 &= ~(1UL << 17);
+    ifconfig0 |= (1UL << 16);
+  }
+  nrf_qspi_ifconfig0_raw_set(NRF_QSPI, ifconfig0);
+  nrf_qspi_iftiming_set(NRF_QSPI, 6);
+#endif
 
   // Enable QSPI peripheral
   nrf_qspi_enable(NRF_QSPI);

@@ -26,6 +26,7 @@
 PBL_LOG_MODULE_DEFINE(driver_pmic_npm1300, CONFIG_DRIVER_PMIC_LOG_LEVEL);
 
 #define CHARGER_DEBOUNCE_MS 400
+#define CHARGER_POLL_MS 1000
 #define ADC_POLL_DELAY_MS   5     // Delay between ADC poll iterations to reduce I2C traffic
 #define ADC_POLL_TIMEOUT_MS 100   // Max time to wait for ADC measurement
 static TimerID s_debounce_charger_timer = TIMER_INVALID_ID;
@@ -94,6 +95,7 @@ typedef enum {
   PmicRegisters_ADC_ADCNTCRSEL = 0x050AU,
   PmicRegisters_ADC_ADCNTCRSEL__ADCNTCRSEL_HIZ = 0x0U,
   PmicRegisters_ADC_ADCNTCRSEL__ADCNTCRSEL_10K = 0x1U,
+  PmicRegisters_ADC_ADCNTCRSEL__ADCNTCRSEL_100K = 0x3U,
   PmicRegisters_ADC_ADCVBATRESULTMSB = 0x0511,
   PmicRegisters_ADC_ADCNTCRESULTMSB = 0x512,
   PmicRegisters_ADC_ADCVSYSRESULTMSB = 0x0514,
@@ -121,6 +123,8 @@ typedef enum {
   PmicRegisters_ERRLOG_SCRATCH0 = 0x0E01,
   PmicRegisters_ERRLOG_SCRATCH1 = 0x0E02,
   PmicRegisters_BUCK_BUCK1ENACLR = 0x0401,
+  PmicRegisters_BUCK_BUCK2ENASET = 0x0402,
+  PmicRegisters_BUCK_BUCK2ENACLR = 0x0403,
   PmicRegisters_BUCK_BUCK1NORMVOUT = 0x0408,
   PmicRegisters_BUCK_BUCK2NORMVOUT = 0x040A,
   PmicRegisters_BUCK_BUCKSWCTRLSEL = 0x040F,
@@ -137,6 +141,7 @@ typedef enum {
   PmicRegisters_LDSW_LDSWSTATUS__LDSW2PWRUPLDO = 0x08,
   PmicRegisters_LDSW_LDSWCONFIG = 0x0807,
   PmicRegisters_LDSW_LDSW1LDOSEL = 0x0808,
+  PmicRegisters_LDSW_LDSW1LDOSEL__LDSW_MODE = 0,
   PmicRegisters_LDSW_LDSW2LDOSEL = 0x0809,
   PmicRegisters_LDSW_LDSW2LDOSEL__LDSW_MODE = 0,
   PmicRegisters_LDSW_LDSW2LDOSEL__LDO_MODE = 1,
@@ -254,6 +259,7 @@ static void prv_clear_pending_interrupts() {
   prv_write_register(PmicRegisters_MAIN_EVENTSVBUSIN0CLR, PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSDETECTED | PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSREMOVED);
 }
 
+#ifdef CONFIG_PMIC_NPM1300_IRQ
 static void prv_pmic_state_change_cb(void *null) {
   prv_clear_pending_interrupts();
   new_timer_start(s_debounce_charger_timer, CHARGER_DEBOUNCE_MS,
@@ -270,6 +276,31 @@ static void prv_configure_interrupts(void) {
   exti_configure_pin(BOARD_CONFIG_POWER.pmic_int, ExtiTrigger_Rising, prv_npm1300_interrupt_handler);
   exti_enable(BOARD_CONFIG_POWER.pmic_int);
 }
+#else
+// Without a host interrupt, poll VBUS and report changes like the IRQ would
+static TimerID s_poll_timer = TIMER_INVALID_ID;
+static bool s_last_usb_connected;
+
+static void prv_poll_charger(void *null) {
+  bool connected = pmic_is_usb_connected();
+
+  if (connected != s_last_usb_connected) {
+    s_last_usb_connected = connected;
+    prv_clear_pending_interrupts();
+    new_timer_start(s_debounce_charger_timer, CHARGER_DEBOUNCE_MS,
+                    prv_handle_charge_state_change, NULL, 0 /*flags*/);
+  }
+}
+
+static void prv_configure_interrupts(void) {
+  prv_clear_pending_interrupts();
+
+  s_last_usb_connected = pmic_is_usb_connected();
+  s_poll_timer = new_timer_create();
+  new_timer_start(s_poll_timer, CHARGER_POLL_MS, prv_poll_charger, NULL,
+                  TIMER_START_FLAG_REPEATING);
+}
+#endif
 
 bool pmic_init(void) {
   bool ok = true;
@@ -304,6 +335,21 @@ bool pmic_init(void) {
   }
 #endif
 
+#ifdef CONFIG_BOARD_EVENG1
+  // BUCK2 (1.2V) and LDSW1 (1.8V) only feed the display panel: keep them off
+  // until the display driver powers it up.
+  ok &= prv_buck_set_sw_ctrl(PmicRegisters_BUCK_BUCK2NORMVOUT,
+                              PmicRegisters_BUCK_BUCK2VOUTSTATUS,
+                              PmicRegisters_BUCK_BUCKSWCTRLSEL__BUCK2SWCTRLSEL_SWCTRL,
+                              2 /* 1.2V */);
+  ok &= prv_write_register(PmicRegisters_BUCK_BUCK2ENACLR, 1);
+  ok &= prv_write_register(PmicRegisters_LDSW_LDSW1LDOSEL, PmicRegisters_LDSW_LDSW1LDOSEL__LDSW_MODE);
+  ok &= prv_write_register(PmicRegisters_LDSW_TASKLDSW1CLR, 1);
+  // LDSW2 load switch feeds the IMU and microphone
+  ok &= prv_write_register(PmicRegisters_LDSW_LDSW2LDOSEL, PmicRegisters_LDSW_LDSW2LDOSEL__LDSW_MODE);
+  ok &= prv_write_register(PmicRegisters_LDSW_TASKLDSW2SET, 1);
+#endif
+
 // FIXME(OBELIX,GETAFIX): Needs to be configurable at board level
 #if defined(CONFIG_BOARD_OBELIX) || defined(CONFIG_BOARD_GETAFIX)
   // Anomaly 27: set BUCK1 to SW control with workaround, then disable it
@@ -322,8 +368,10 @@ bool pmic_init(void) {
   ok &= prv_write_register(PmicRegisters_MAIN_INTENEVENTSBCHARGER1SET, PmicRegisters_MAIN_EVENTSBCHARGER1__EVENTCHGCOMPLETED);
   ok &= prv_write_register(PmicRegisters_MAIN_EVENTSVBUSIN0CLR, PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSDETECTED | PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSREMOVED);
   ok &= prv_write_register(PmicRegisters_MAIN_INTENEVENTSVBUSIN0SET, PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSDETECTED | PmicRegisters_MAIN_EVENTSVBUSIN0__EVENTVBUSREMOVED);
+#ifdef CONFIG_PMIC_NPM1300_IRQ
   ok &= prv_write_register(PmicRegisters_GPIOS_GPIOMODE1, PmicRegisters_GPIOS_GPIOMODE__GPOIRQ);
   ok &= prv_write_register(PmicRegisters_GPIOS_GPIOOPENDRAIN1, 0);
+#endif
 
   ok &= prv_write_register(PmicRegisters_SHIP_SHPHLDCONFIG, PmicRegisters_SHIP_SHPHLDCONFIG__SHPHLDTIM_96MS);
   ok &= prv_write_register(PmicRegisters_SHIP_TASKSHPHLDCFGSTROBE, 1);
@@ -356,6 +404,13 @@ bool pmic_init(void) {
 #elif defined(CONFIG_BOARD_ASTERIX)
   ok &= prv_write_register(PmicRegisters_ADC_ADCNTCRSEL, PmicRegisters_ADC_ADCNTCRSEL__ADCNTCRSEL_10K);
 
+  ok &= prv_write_register(PmicRegisters_BCHARGER_BCHGVTERM, PmicRegisters_BCHARGER_BCHGVTERM__BCHGVTERMNORM_4V20);
+  ok &= prv_write_register(PmicRegisters_BCHARGER_BCHGVTERMR, PmicRegisters_BCHARGER_BCHGVTERMR__BCHGVTERMREDUCED_4V00);
+#elif defined(CONFIG_BOARD_EVENG1)
+  ok &= prv_write_register(PmicRegisters_ADC_ADCNTCRSEL, PmicRegisters_ADC_ADCNTCRSEL__ADCNTCRSEL_100K);
+
+  // Early G1 boards only tolerate 4.2V; later ones are rated 4.4V but we
+  // cannot tell them apart here, so use the safe value.
   ok &= prv_write_register(PmicRegisters_BCHARGER_BCHGVTERM, PmicRegisters_BCHARGER_BCHGVTERM__BCHGVTERMNORM_4V20);
   ok &= prv_write_register(PmicRegisters_BCHARGER_BCHGVTERMR, PmicRegisters_BCHARGER_BCHGVTERMR__BCHGVTERMREDUCED_4V00);
 #endif
@@ -799,6 +854,22 @@ static bool ldo2_set_enabled(bool enabled) {
   }
 }
 
+static bool ldsw1_set_enabled(bool enabled) {
+  if (enabled) {
+    return prv_write_register(PmicRegisters_LDSW_TASKLDSW1SET, 1);
+  } else {
+    return prv_write_register(PmicRegisters_LDSW_TASKLDSW1CLR, 1);
+  }
+}
+
+static bool buck2_set_enabled(bool enabled) {
+  if (enabled) {
+    return prv_write_register(PmicRegisters_BUCK_BUCK2ENASET, 1);
+  } else {
+    return prv_write_register(PmicRegisters_BUCK_BUCK2ENACLR, 1);
+  }
+}
+
 static bool dischg_limit_ma_set(uint32_t dischg_limit_ma) {
   bool ret;
 
@@ -843,5 +914,7 @@ static bool dischg_limit_ma_set(uint32_t dischg_limit_ma) {
 Npm1300Ops_t NPM1300_OPS = {
   .gpio_set = gpio_set,
   .ldo2_set_enabled = ldo2_set_enabled,
+  .ldsw1_set_enabled = ldsw1_set_enabled,
+  .buck2_set_enabled = buck2_set_enabled,
   .dischg_limit_ma_set = dischg_limit_ma_set,
 };

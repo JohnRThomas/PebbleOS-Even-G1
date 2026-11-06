@@ -20,11 +20,9 @@ config HAL_NORDIC_NRF52840
 config HAL_NORDIC_NRF5340
     bool "nRF5340 SoC variant"
     help
-      Configure the nrfx HAL for the Nordic NRF5340 SoC. This sets
-      the NRF5340 target define and enables the nrfx drivers
-      used by Pebble (I2S, GPIOTE, PDM, PPI, PWM, SPIM3, TIMER1/2,
-      TWIM0/1, UARTE0). It also disables NFCT pin usage so those pins
-      can be used as GPIOs and enables GPIO-as-pin-reset.
-
+      Configure the nrfx HAL for the Nordic nRF5340 SoC application
+      core. This sets the NRF5340_XXAA_APPLICATION target define and
+      enables the nrfx drivers used by Pebble (DPPI, GPIOTE0, PDM0,
+      PWM0, SPIM4, TIMER1/2, TWIM1/2, UARTE0).
 
 endif # HAL_NORDIC

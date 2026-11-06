@@ -7,7 +7,7 @@
 
 #include "board/board.h"
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 #include <hal/nrf_gpio.h>
 
 typedef enum {

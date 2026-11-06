@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2026 Core Devices LLC
 # SPDX-License-Identifier: Apache-2.0
-if bld.env.CONFIG_SOC_NRF52:
+# The nRF53 application core shares the nRF52 SoC support code
+if bld.env.CONFIG_SOC_NRF5:
     bld.recurse("nrf52")

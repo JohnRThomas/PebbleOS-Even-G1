@@ -23,6 +23,11 @@ config VIBE_DRV2604
     help
       Support for the TI DRV2604 haptic driver.
 
+config VIBE_STUB
+    bool "Stub"
+    help
+      No vibration motor.
+
 module = DRIVER_VIBE
 module-str = Vibration Motor
 source "src/fw/Kconfig.template.log_level"

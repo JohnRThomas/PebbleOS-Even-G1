@@ -23,6 +23,29 @@ if bld.env.CONFIG_HAL_NORDIC_NRF52840:
         'NRFX_UARTE0_ENABLED=1',
     ])
 
+elif bld.env.CONFIG_HAL_NORDIC_NRF5340:
+    bld.env.append_unique('DEFINES', [
+        'NRF5340_XXAA_APPLICATION',
+        'NRFX_DPPI_ENABLED=1',
+        'NRFX_GPIOTE_ENABLED=1',
+        'NRFX_GPIOTE0_ENABLED=1',
+        'NRFX_GPIOTE_CONFIG_NUM_OF_EVT_HANDLERS=4',
+        'NRFX_PDM_ENABLED=1',
+        'NRFX_PDM0_ENABLED=1',
+        'NRFX_PWM_ENABLED=1',
+        'NRFX_PWM0_ENABLED=1',
+        'NRFX_SPIM_ENABLED=1',
+        'NRFX_SPIM4_ENABLED=1',
+        'NRFX_TIMER_ENABLED=1',
+        'NRFX_TIMER1_ENABLED=1',
+        'NRFX_TIMER2_ENABLED=1',
+        'NRFX_TWIM_ENABLED=1',
+        'NRFX_TWIM1_ENABLED=1',
+        'NRFX_TWIM2_ENABLED=1',
+        'NRFX_UARTE_ENABLED=1',
+        'NRFX_UARTE0_ENABLED=1',
+    ])
+
 micro_sources = bld.path.ant_glob('nrfx/**/*.c', excl=['**/system_nrf*.c', '**/startup_nrf_common.c', '**/nrfx_twi_twim.c'])
 
 micro_includes = [
@@ -38,8 +61,7 @@ micro_includes = [
 if bld.env.CONFIG_BOARD_ASTERIX:
     # is there a better way to do this?
     micro_includes += ['../../src/fw/board/boards/board_asterix']
-if bld.env.CONFIG_BOARD_EVENG1:
-    # is there a better way to do this?
+elif bld.env.CONFIG_BOARD_EVENG1:
     micro_includes += ['../../src/fw/board/boards/board_eveng1']
 else:
     bld.fatal("no board for nRF5 includes")

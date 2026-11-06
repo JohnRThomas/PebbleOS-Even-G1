@@ -31,6 +31,8 @@ enum {
 #define IRQ_DEF(num, irq) IS_VALID_IRQ__##irq,
 #if defined(CONFIG_SOC_NRF52)
 #  include "irq_nrf52.def"
+#elif defined(CONFIG_SOC_NRF53)
+#  include "irq_nrf53.def"
 #else
 #  error need IRQ table for new micro family
 #endif
@@ -53,7 +55,7 @@ enum {
 /*
  * The above static assert checks that the requested IRQ is valid by checking that the enum
  * value (generated above) is declared. The static assert itself will not trip, but you will get
- * a compilation error from that line if the IRQ does not exist within irq_nrf52.def.
+ * a compilation error from that line if the IRQ does not exist within the SoC IRQ table.
  */
 
 typedef struct {

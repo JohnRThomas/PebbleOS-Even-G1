@@ -110,7 +110,7 @@ bool rtc_alarm_is_initialized(void);
 //! @param buffer Buffer used to write the string into. Must be at least TIME_STRING_BUFFER_SIZE
 const char* time_t_to_string(char* buffer, time_t t);
 
-#ifdef CONFIG_SOC_NRF52
+#ifdef CONFIG_SOC_NRF5
 void rtc_irq_handler(void);
 void rtc_enable_synthetic_systick(void);
 void rtc_systick_pause(void);

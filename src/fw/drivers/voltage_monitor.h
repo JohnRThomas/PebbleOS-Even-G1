@@ -10,7 +10,7 @@
 
 #define NUM_CONVERSIONS 40
 
-#if defined(CONFIG_SOC_NRF52)
+#if defined(CONFIG_SOC_NRF5)
 # include <hal/nrf_saadc.h>
 
 typedef const struct VoltageMonitorDevice {

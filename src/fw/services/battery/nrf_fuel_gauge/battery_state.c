@@ -54,6 +54,8 @@ static const struct battery_model prv_battery_model = {
 #include "battery_obelix.inc"
 #elif defined(CONFIG_BOARD_GETAFIX)
 #include "battery_getafix.inc"
+#elif defined(CONFIG_BOARD_EVENG1)
+#include "battery_eveng1.inc"
 #else
 #error "Battery model not defined for this platform"
 #endif

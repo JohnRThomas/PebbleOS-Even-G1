@@ -23,10 +23,10 @@ config FLASH_QEMU
     help
       Support for the QEMU external flash peripheral.
 
-config NORDIC_QSPI_NOR
-    bool "NRF5 QSPI NOR Flash"
+config FLASH_MX25U25645G
+    bool "Macronix MX25U25645G"
     help
-      NRF5 QSPI NOR flash supporting the JEDEC CFI interface (such as MX25R6435F)
+      Support for the Macronix MX25U25645G NOR flash.
 
 module = DRIVER_FLASH
 module-str = Flash

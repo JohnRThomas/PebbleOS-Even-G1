@@ -13,6 +13,14 @@ config PMIC_NPM1300
     help
       Support for the Nordic nPM1300 PMIC.
 
+config PMIC_NPM1300_IRQ
+    bool "nPM1300 host interrupt"
+    depends on PMIC_NPM1300
+    default y
+    help
+      Route nPM1300 charger/VBUS events to the host through nPM1300
+      GPIO1. Without it, charger state changes are picked up by polling.
+
 module = DRIVER_PMIC
 module-str = PMIC
 source "src/fw/Kconfig.template.log_level"

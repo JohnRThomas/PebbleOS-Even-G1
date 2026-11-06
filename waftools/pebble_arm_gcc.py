@@ -234,6 +234,9 @@ Or re-configure with the --relax_toolchain_restrictions option. """
     if conf.env.CONFIG_SOC_NRF52:
         args += ["-mcpu=cortex-m4"]
         cpu_fpu = "fpv4-sp-d16"
+    elif conf.env.CONFIG_SOC_NRF53:
+        args += ["-mcpu=cortex-m33"]
+        cpu_fpu = "fpv5-sp-d16"
     elif conf.env.CONFIG_SOC_SF32LB52:
         args += ["-mcpu=star-mc1"]
         cpu_fpu = "fpv5-sp-d16"
